@@ -121,8 +121,25 @@ export default function MyPicksTab({
         </select>
       </div>
 
+      {/* Add new player — always visible */}
+      <div className="add-player-section">
+        <div className="add-player-label">Add New Player</div>
+        <div className="admin-row">
+          <input
+            className="admin-input"
+            placeholder="Enter name..."
+            value={adminInput}
+            onChange={e => setAdminInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleAddPlayer()}
+          />
+          <button className="admin-btn add" onClick={handleAddPlayer}>
+            Add
+          </button>
+        </div>
+      </div>
+
       {!activePlayer && (
-        <div className="empty-state" style={{ paddingTop: 16 }}>Select your name above, or add yourself below.</div>
+        <div className="empty-state" style={{ paddingTop: 8 }}>Select your name above to start making picks.</div>
       )}
 
       {activePlayer && (
@@ -183,37 +200,25 @@ export default function MyPicksTab({
         </>
       )}
 
-      {/* Add player — open to everyone */}
-      <div className="admin-section">
-        <h2>Players</h2>
-        <div className="players-list">
-          {players.map(p => (
-            <span key={p.id} className="player-tag">
-              {p.name}
-              {isAdmin && (
+      {/* Player list with remove (Chaouki only) */}
+      {isAdmin && (
+        <div className="admin-section">
+          <h2>Manage Players</h2>
+          <div className="players-list">
+            {players.map(p => (
+              <span key={p.id} className="player-tag">
+                {p.name}
                 <button
                   onClick={() => handleRemovePlayer(p.id)}
                   title={`Remove ${p.name}`}
                 >
                   ×
                 </button>
-              )}
-            </span>
-          ))}
+              </span>
+            ))}
+          </div>
         </div>
-        <div className="admin-row">
-          <input
-            className="admin-input"
-            placeholder="Add a player..."
-            value={adminInput}
-            onChange={e => setAdminInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleAddPlayer()}
-          />
-          <button className="admin-btn add" onClick={handleAddPlayer}>
-            Add
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

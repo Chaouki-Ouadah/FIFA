@@ -8,6 +8,39 @@ const SCORING_ROWS = [
   { scenario: 'WC Winner correct (one-time guess)', pts: '+10', type: 'red' },
 ];
 
+const HOW_TO_AR = [
+  {
+    num: '١',
+    title: 'سجّل اسمك',
+    desc: 'اذهب إلى "تنبؤاتي" → اختر اسمك من القائمة، أو أضف اسمك إذا لم يكن موجوداً.',
+  },
+  {
+    num: '٢',
+    title: 'تنبأ بنتائج المباريات',
+    desc: 'لكل مباراة قادمة، اختر الفائز (الفريق المضيف / تعادل / الفريق الضيف) وأدخل النتيجة المتوقعة، ثم احفظ.',
+  },
+  {
+    num: '٣',
+    title: 'لا تتأخر',
+    desc: 'تُغلق التنبؤات قبل ساعة من انطلاق المباراة. بعد الإغلاق لا يمكنك تغيير توقعك.',
+  },
+  {
+    num: '٤',
+    title: 'توقع بطل العالم',
+    desc: 'لديك تنبؤ واحد فقط لبطل كأس العالم. يجب إدخاله قبل 24 يونيو 2026. إن أصبت تحصل على 10 نقاط إضافية.',
+  },
+  {
+    num: '٥',
+    title: 'تابع الترتيب',
+    desc: 'تتحدث النقاط تلقائياً بعد انتهاء كل مباراة. تُحتسب فقط المباريات من 14 يونيو 2026.',
+  },
+  {
+    num: '٦',
+    title: 'نظام النقاط',
+    desc: 'الفائز الصحيح = 3 نقاط → فرق الأهداف صحيح = 5 نقاط → النتيجة الدقيقة = 10 نقاط. التعادل الصحيح = 3 نقاط، النتيجة الدقيقة للتعادل = 8 نقاط.',
+  },
+];
+
 const HOW_TO = [
   {
     num: '01',
@@ -82,7 +115,23 @@ export default function RulesTab() {
         </div>
       </div>
 
-      {/* How to use */}
+      {/* Arabic how-to */}
+      <div className="rules-section">
+        <h2 dir="rtl" style={{ fontFamily: 'var(--font-body)', letterSpacing: 0 }}>كيفية المشاركة</h2>
+        <ul className="how-to-list" dir="rtl">
+          {HOW_TO_AR.map(h => (
+            <li key={h.num} className="how-to-item" style={{ flexDirection: 'row-reverse', textAlign: 'right' }}>
+              <span className="how-to-num" style={{ fontFamily: 'var(--font-body)', minWidth: 28 }}>{h.num}</span>
+              <div className="how-to-text">
+                <strong>{h.title}</strong>
+                <span>{h.desc}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* How to use — English */}
       <div className="rules-section">
         <h2>How to Play</h2>
         <ul className="how-to-list">
