@@ -157,8 +157,11 @@ export default function MyPicksTab({
   const wcLocked = isWcWinnerLocked();
   const isAdmin = activePlayer === 'Chaouki';
 
+  const CUTOFF_TS = new Date('2026-06-14T00:00:00Z').getTime();
   const sortedMatches = useMemo(
-    () => [...matches].sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate)),
+    () => matches
+      .filter(m => new Date(m.utcDate).getTime() >= CUTOFF_TS)
+      .sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate)),
     [matches]
   );
 
