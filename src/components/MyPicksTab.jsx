@@ -114,23 +114,31 @@ export default function MyPicksTab({
 
     const newPlayer = await addPlayer(name);
 
-    // Copy Chaouki's picks for all locked matches to the new player
-    const chaouki = players.find(p => p.name === 'Chaouki');
-    if (chaouki) {
+    // For each locked match, copy a random existing player's pick
+    const existingPlayers = players.filter(p => p.id !== newPlayer.id);
+    if (existingPlayers.length > 0) {
       const lockedMatches = matches.filter(m => isPickLocked(m.utcDate));
       if (lockedMatches.length > 0) {
-        const chaoukiPicks = await getPlayerPicks(
-          chaouki.id,
-          lockedMatches.map(m => m.id)
+        // Fetch all existing players' picks for locked matches in one go
+        const allPicks = await Promise.all(
+          existingPlayers.map(p =>
+            getPlayerPicks(p.id, lockedMatches.map(m => m.id))
+              .then(picks => ({ playerId: p.id, picks }))
+          )
         );
+
         await Promise.all(
-          Object.entries(chaoukiPicks).map(([matchId, pick]) =>
-            savePick(matchId, newPlayer.id, {
+          lockedMatches.map(m => {
+            // Pick a random existing player for this match
+            const donor = allPicks[Math.floor(Math.random() * allPicks.length)];
+            const pick = donor.picks[m.id];
+            if (!pick?.winner) return null;
+            return savePick(m.id, newPlayer.id, {
               winner: pick.winner,
               homeGoals: pick.homeGoals ?? 0,
               awayGoals: pick.awayGoals ?? 0,
-            })
-          )
+            });
+          })
         );
       }
     }
