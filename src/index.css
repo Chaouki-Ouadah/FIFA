@@ -97,7 +97,7 @@ body::before {
   text-align: left;
   max-width: 155px;
   box-shadow: 0 0 14px rgba(0,165,80,0.15);
-  animation: banner-breathe 3s ease-in-out infinite;
+  animation: banner-breathe 4s ease-in-out infinite;
   transition: box-shadow 0.2s, border-color 0.2s;
   z-index: 10;
 }
@@ -116,13 +116,13 @@ body::before {
 }
 
 @keyframes banner-breathe {
-  0%, 100% { opacity: 0.82; }
-  50%       { opacity: 1; }
+  0%, 100% { opacity: 0.25; box-shadow: 0 0 4px rgba(0,165,80,0.05); }
+  50%       { opacity: 1;   box-shadow: 0 0 22px rgba(0,165,80,0.4); }
 }
 
 @keyframes banner-breathe-live {
-  0%, 100% { opacity: 0.88; box-shadow: 0 0 10px rgba(34,197,94,0.2); }
-  50%       { opacity: 1;    box-shadow: 0 0 22px rgba(34,197,94,0.45); }
+  0%, 100% { opacity: 0.3;  box-shadow: 0 0 4px rgba(34,197,94,0.1); }
+  50%       { opacity: 1;   box-shadow: 0 0 28px rgba(34,197,94,0.55); }
 }
 
 .next-match-top {
