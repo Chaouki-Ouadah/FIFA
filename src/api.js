@@ -1,7 +1,3 @@
-const API_KEY = import.meta.env.VITE_FOOTBALL_API_KEY;
-const BASE = 'https://api.football-data.org/v4';
-const COMPETITION_ID = 2000;
-
 let _cache = null;
 let _cacheTs = 0;
 
@@ -12,13 +8,13 @@ export async function fetchMatches() {
 
   if (_cache && now - _cacheTs < ttl) return _cache;
 
-  const res = await fetch(`${BASE}/competitions/${COMPETITION_ID}/matches`, {
-    headers: { 'X-Auth-Token': API_KEY },
-  });
+  const res = await fetch('/.netlify/functions/matches');
 
-  if (!res.ok) throw new Error(`football-data.org ${res.status}`);
+  if (!res.ok) throw new Error(`API error ${res.status}`);
 
   const data = await res.json();
+  if (data.error) throw new Error(data.error);
+
   _cache = data.matches ?? [];
   _cacheTs = now;
   return _cache;
