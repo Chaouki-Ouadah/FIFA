@@ -4,6 +4,7 @@ import GroupsTab from './components/GroupsTab';
 import LeaderboardTab from './components/LeaderboardTab';
 import MyPicksTab from './components/MyPicksTab';
 import RulesTab from './components/RulesTab';
+import NextMatchBanner from './components/NextMatchBanner';
 import { getPlayers } from './firebase';
 import { fetchMatches } from './api';
 
@@ -66,6 +67,11 @@ export default function App() {
         <button className="lang-toggle" onClick={toggleLang} title="Toggle language">
           {lang === 'en' ? 'العربية' : 'EN'}
         </button>
+        <NextMatchBanner
+          matches={matches}
+          onGoToPicks={() => setActiveTab('picks')}
+          lang={lang}
+        />
         <div className="header-crest-placeholder">DZ</div>
         <h1>World Cup 2026 <span className="accent">Soubella</span></h1>
         <p className="header-sub">Algeria · World Cup 2026</p>
