@@ -122,7 +122,7 @@ export default function MyPicksTab({
       </div>
 
       {!activePlayer && (
-        <div className="empty-state">Select a player to manage picks.</div>
+        <div className="empty-state" style={{ paddingTop: 16 }}>Select your name above, or add yourself below.</div>
       )}
 
       {activePlayer && (
@@ -183,37 +183,37 @@ export default function MyPicksTab({
         </>
       )}
 
-      {/* Admin panel */}
-      {isAdmin && (
-        <div className="admin-section">
-          <h2>Admin — Players</h2>
-          <div className="players-list">
-            {players.map(p => (
-              <span key={p.id} className="player-tag">
-                {p.name}
+      {/* Add player — open to everyone */}
+      <div className="admin-section">
+        <h2>Players</h2>
+        <div className="players-list">
+          {players.map(p => (
+            <span key={p.id} className="player-tag">
+              {p.name}
+              {isAdmin && (
                 <button
                   onClick={() => handleRemovePlayer(p.id)}
                   title={`Remove ${p.name}`}
                 >
                   ×
                 </button>
-              </span>
-            ))}
-          </div>
-          <div className="admin-row">
-            <input
-              className="admin-input"
-              placeholder="New player name..."
-              value={adminInput}
-              onChange={e => setAdminInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleAddPlayer()}
-            />
-            <button className="admin-btn add" onClick={handleAddPlayer}>
-              Add
-            </button>
-          </div>
+              )}
+            </span>
+          ))}
         </div>
-      )}
+        <div className="admin-row">
+          <input
+            className="admin-input"
+            placeholder="Add a player..."
+            value={adminInput}
+            onChange={e => setAdminInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleAddPlayer()}
+          />
+          <button className="admin-btn add" onClick={handleAddPlayer}>
+            Add
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

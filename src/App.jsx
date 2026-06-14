@@ -56,7 +56,7 @@ export default function App() {
       <header className="app-header">
         <div className="header-crest-placeholder">DZ</div>
         <h1>World Cup 2026 <span className="accent">Soubella</span></h1>
-        <p className="header-sub">Algeria · Chaouki · Oussama · Taleb</p>
+        <p className="header-sub">Algeria · World Cup 2026</p>
         <div className="header-divider" />
       </header>
       <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
