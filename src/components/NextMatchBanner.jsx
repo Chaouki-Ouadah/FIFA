@@ -43,15 +43,8 @@ export default function NextMatchBanner({ matches, onGoToPicks, lang }) {
       onClick={onGoToPicks}
       title={isAr ? 'اذهب إلى تنبؤاتي' : 'Go to My Picks'}
     >
-      <div className="next-match-top">
-        <span className={`next-match-dot${isLive ? ' live' : ''}`} />
-        <span className="next-match-label">
-          {isLive ? (isAr ? 'مباشر الآن' : 'LIVE NOW')
-           : isHT  ? (isAr ? 'استراحة' : 'HALF TIME')
-           :          (isAr ? 'المباراة القادمة' : 'NEXT MATCH')}
-        </span>
-      </div>
       <div className="next-match-teams">
+        <span className={`next-match-dot${isLive ? ' live' : ''}`} />
         {home} <span className="vs">vs</span> {away}
       </div>
       {(isLive || isHT) ? (

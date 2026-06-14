@@ -61,7 +61,8 @@ body::before {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 12px 0 20px;
+  padding: 4px 0 20px;
+  position: relative;
 }
 
 /* ─── Header top row (banner + lang toggle) ─── */
@@ -96,10 +97,10 @@ body::before {
   background: var(--surface);
   border: 1px solid var(--accent);
   border-radius: var(--radius);
-  padding: 9px 13px;
+  padding: 6px 10px;
   cursor: pointer;
   text-align: left;
-  max-width: 155px;
+  max-width: 145px;
   box-shadow: 0 0 14px rgba(0,165,80,0.15);
   animation: banner-breathe 4s ease-in-out infinite;
   transition: box-shadow 0.2s, border-color 0.2s;
@@ -129,16 +130,9 @@ body::before {
   50%       { opacity: 1;   box-shadow: 0 0 28px rgba(34,197,94,0.55); }
 }
 
-.next-match-top {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-bottom: 4px;
-}
-
 .next-match-dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: var(--accent);
   flex-shrink: 0;
@@ -149,22 +143,16 @@ body::before {
   animation: pulse 1.2s ease-in-out infinite;
 }
 
-.next-match-label {
-  font-family: var(--font-heading);
-  font-size: 0.58rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
 .next-match-teams {
   font-family: var(--font-heading);
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: var(--text);
   line-height: 1.25;
   margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .next-match-teams .vs {
@@ -175,11 +163,11 @@ body::before {
 
 .next-match-countdown {
   font-family: var(--font-heading);
-  font-size: 1.05rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: var(--accent);
   letter-spacing: 0.03em;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 
 .next-match-live-text {
@@ -201,9 +189,9 @@ body::before {
 .next-match-banner:hover .next-match-cta { color: var(--accent); }
 
 @media (max-width: 480px) {
-  .next-match-banner { max-width: 120px; padding: 7px 10px; }
-  .next-match-teams  { font-size: 0.7rem; }
-  .next-match-countdown { font-size: 0.9rem; }
+  .next-match-banner { max-width: 110px; padding: 5px 8px; }
+  .next-match-teams  { font-size: 0.62rem; }
+  .next-match-countdown { font-size: 0.75rem; }
 }
 
 .app-header::before {
