@@ -64,10 +64,33 @@ body::before {
   overflow: visible;
 }
 
-.lang-toggle {
+/* ─── Header top row (banner + lang toggle) ─── */
+.header-top-row {
   position: absolute;
-  top: 12px;
+  top: 10px;
+  left: 12px;
   right: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.header-top-row > * { pointer-events: auto; }
+
+@media (max-width: 600px) {
+  .header-top-row {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    margin-bottom: 14px;
+    align-items: flex-start;
+  }
+}
+
+.lang-toggle {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 20px;
@@ -86,9 +109,6 @@ body::before {
 
 /* ─── Next Match Banner ─── */
 .next-match-banner {
-  position: absolute;
-  top: 10px;
-  left: 12px;
   background: var(--surface);
   border: 1px solid var(--accent);
   border-radius: var(--radius);
