@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem \"$env:USERPROFILE\\\\.claude\\\\projects\\\\\" -Force 2>&1)",
+      "WebFetch(domain:gentle-choux-60fb00.netlify.app)",
+      "WebFetch(domain:github.com)",
+      "PowerShell(gh auth status 2>&1)",
+      "PowerShell(Get-Command gh -ErrorAction SilentlyContinue)"
+    ]
+  }
+}

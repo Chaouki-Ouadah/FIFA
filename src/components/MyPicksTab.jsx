@@ -1,0 +1,300 @@
+import { useState, useEffect, useMemo } from 'react';
+import {
+  getPlayerPicks,
+  savePick,
+  saveWcWinner,
+  getWcWinners,
+  addPlayer,
+  removePlayer,
+  getPlayers,
+} from '../firebase';
+import { isPickLocked, isWcWinnerLocked, matchStatusLabel } from '../api';
+
+export default function MyPicksTab({
+  players,
+  activePlayer,
+  onPlayerChange,
+  onPlayersChange,
+  matches,
+}) {
+  const [savedPicks, setSavedPicks] = useState({});
+  const [localPicks, setLocalPicks] = useState({});
+  const [wcWinnerData, setWcWinnerData] = useState(null);
+  const [localWcWinner, setLocalWcWinner] = useState('');
+  const [saving, setSaving] = useState({});
+  const [wcSaving, setWcSaving] = useState(false);
+  const [adminInput, setAdminInput] = useState('');
+
+  const activePlayerId = useMemo(
+    () => players.find(p => p.name === activePlayer)?.id ?? null,
+    [players, activePlayer]
+  );
+
+  useEffect(() => {
+    if (!activePlayerId || matches.length === 0) return;
+    Promise.all([
+      getPlayerPicks(activePlayerId, matches.map(m => m.id)),
+      getWcWinners().then(all => all[activePlayerId] ?? null),
+    ]).then(([picks, wcW]) => {
+      setSavedPicks(picks);
+      setLocalPicks({});
+      setWcWinnerData(wcW);
+      setLocalWcWinner(wcW?.team ?? '');
+    }).catch(console.error);
+  }, [activePlayerId, matches]);
+
+  function getPick(matchId) {
+    return { ...savedPicks[matchId], ...localPicks[matchId] };
+  }
+
+  function setPickField(matchId, field, value) {
+    setLocalPicks(s => ({ ...s, [matchId]: { ...s[matchId], [field]: value } }));
+  }
+
+  async function handleSavePick(matchId) {
+    if (!activePlayerId) return;
+    const pick = getPick(matchId);
+    if (!pick.winner) return;
+    setSaving(s => ({ ...s, [matchId]: true }));
+    try {
+      await savePick(matchId, activePlayerId, {
+        winner: pick.winner,
+        homeGoals: Number(pick.homeGoals ?? 0),
+        awayGoals: Number(pick.awayGoals ?? 0),
+      });
+      setSavedPicks(s => ({ ...s, [matchId]: pick }));
+      setLocalPicks(s => { const n = { ...s }; delete n[matchId]; return n; });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSaving(s => ({ ...s, [matchId]: false }));
+    }
+  }
+
+  async function handleSaveWcWinner() {
+    if (!activePlayerId || !localWcWinner.trim()) return;
+    setWcSaving(true);
+    try {
+      await saveWcWinner(activePlayerId, localWcWinner.trim());
+      setWcWinnerData({ team: localWcWinner.trim() });
+    } finally {
+      setWcSaving(false);
+    }
+  }
+
+  async function handleAddPlayer() {
+    const name = adminInput.trim();
+    if (!name) return;
+    await addPlayer(name);
+    const updated = await getPlayers();
+    onPlayersChange(updated);
+    setAdminInput('');
+  }
+
+  async function handleRemovePlayer(playerId) {
+    await removePlayer(playerId);
+    const updated = await getPlayers();
+    onPlayersChange(updated);
+  }
+
+  const wcLocked = isWcWinnerLocked();
+  const isAdmin = activePlayer === 'Chaouki';
+
+  const sortedMatches = useMemo(
+    () => [...matches].sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate)),
+    [matches]
+  );
+
+  return (
+    <div>
+      {/* Player picker */}
+      <div className="player-select-row">
+        <select
+          className="player-select"
+          value={activePlayer}
+          onChange={e => onPlayerChange(e.target.value)}
+        >
+          <option value="">Select player...</option>
+          {players.map(p => (
+            <option key={p.id} value={p.name}>{p.name}</option>
+          ))}
+        </select>
+      </div>
+
+      {!activePlayer && (
+        <div className="empty-state">Select a player to manage picks.</div>
+      )}
+
+      {activePlayer && (
+        <>
+          {/* WC Winner */}
+          <div className="wc-winner-section">
+            <h2>WC Winner Prediction</h2>
+            {!wcLocked ? (
+              <>
+                <p className="match-time" style={{ marginBottom: 8 }}>
+                  Deadline: 24 Jun 2026
+                </p>
+                <input
+                  className="wc-input"
+                  type="text"
+                  placeholder="Country name..."
+                  value={localWcWinner}
+                  onChange={e => setLocalWcWinner(e.target.value)}
+                  disabled={wcSaving}
+                />
+                <button
+                  className="save-btn"
+                  style={{ display: 'block', marginLeft: 0 }}
+                  onClick={handleSaveWcWinner}
+                  disabled={wcSaving || !localWcWinner.trim()}
+                >
+                  {wcSaving ? 'Saving...' : 'Save Prediction'}
+                </button>
+                {wcWinnerData && (
+                  <div className="wc-saved">Saved: {wcWinnerData.team}</div>
+                )}
+              </>
+            ) : (
+              <div style={{ fontSize: '0.85rem' }}>
+                {wcWinnerData
+                  ? <><span style={{ color: 'var(--text-muted)' }}>Locked — </span>{wcWinnerData.team}</>
+                  : <span style={{ color: 'var(--text-muted)' }}>Deadline passed — no prediction saved.</span>
+                }
+              </div>
+            )}
+          </div>
+
+          {/* Match picks */}
+          <div className="section-title">Match Predictions</div>
+          {sortedMatches.length === 0 && (
+            <div className="empty-state">Loading matches...</div>
+          )}
+          {sortedMatches.map(match => (
+            <PickCard
+              key={match.id}
+              match={match}
+              pick={getPick(match.id)}
+              onPickField={(f, v) => setPickField(match.id, f, v)}
+              onSave={() => handleSavePick(match.id)}
+              saving={!!saving[match.id]}
+            />
+          ))}
+        </>
+      )}
+
+      {/* Admin panel */}
+      {isAdmin && (
+        <div className="admin-section">
+          <h2>Admin — Players</h2>
+          <div className="players-list">
+            {players.map(p => (
+              <span key={p.id} className="player-tag">
+                {p.name}
+                <button
+                  onClick={() => handleRemovePlayer(p.id)}
+                  title={`Remove ${p.name}`}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="admin-row">
+            <input
+              className="admin-input"
+              placeholder="New player name..."
+              value={adminInput}
+              onChange={e => setAdminInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleAddPlayer()}
+            />
+            <button className="admin-btn add" onClick={handleAddPlayer}>
+              Add
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PickCard({ match, pick, onPickField, onSave, saving }) {
+  const locked = isPickLocked(match.utcDate);
+  const isLive = match.status === 'IN_PLAY' || match.status === 'PAUSED';
+  const isFinished = match.status === 'FINISHED';
+  const home = match.homeTeam?.shortName ?? match.homeTeam?.name ?? '?';
+  const away = match.awayTeam?.shortName ?? match.awayTeam?.name ?? '?';
+
+  const pickLabel = !pick?.winner ? null
+    : pick.winner === 'home' ? home
+    : pick.winner === 'away' ? away
+    : 'Draw';
+
+  return (
+    <div className="pick-card">
+      <div className="pick-teams">
+        <span>{home}</span>
+        <span className={`status-badge ${isLive ? 'live' : isFinished ? 'finished' : 'upcoming'}`}>
+          {matchStatusLabel(match.status)}
+        </span>
+        <span>{away}</span>
+      </div>
+
+      {locked ? (
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          <span className="locked-badge">Locked</span>
+          {pickLabel ? (
+            <span style={{ fontSize: '0.82rem' }}>
+              {pickLabel}
+              {pick.homeGoals !== undefined && ` (${pick.homeGoals}–${pick.awayGoals})`}
+            </span>
+          ) : (
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>No pick</span>
+          )}
+        </div>
+      ) : (
+        <>
+          <div className="pick-controls">
+            {(['home', 'draw', 'away']).map(w => (
+              <button
+                key={w}
+                className={`pick-btn${pick?.winner === w ? ' selected' : ''}`}
+                onClick={() => onPickField('winner', w)}
+              >
+                {w === 'home' ? home : w === 'away' ? away : 'Draw'}
+              </button>
+            ))}
+          </div>
+          <div className="score-inputs">
+            <input
+              className="score-input"
+              type="number"
+              min="0"
+              max="20"
+              value={pick?.homeGoals ?? ''}
+              placeholder="0"
+              onChange={e => onPickField('homeGoals', e.target.value)}
+            />
+            <span style={{ color: 'var(--text-muted)' }}>–</span>
+            <input
+              className="score-input"
+              type="number"
+              min="0"
+              max="20"
+              value={pick?.awayGoals ?? ''}
+              placeholder="0"
+              onChange={e => onPickField('awayGoals', e.target.value)}
+            />
+            <button
+              className="save-btn"
+              onClick={onSave}
+              disabled={saving || !pick?.winner}
+            >
+              {saving ? '...' : 'Save'}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
