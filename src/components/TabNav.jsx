@@ -2,6 +2,7 @@ const TABS = [
   { id: 'groups', label: 'Groups & Fixtures' },
   { id: 'leaderboard', label: 'Leaderboard' },
   { id: 'picks', label: 'My Picks' },
+  { id: 'rules', label: 'Rules' },
 ];
 
 export default function TabNav({ activeTab, onTabChange }) {

@@ -3,6 +3,7 @@ import TabNav from './components/TabNav';
 import GroupsTab from './components/GroupsTab';
 import LeaderboardTab from './components/LeaderboardTab';
 import MyPicksTab from './components/MyPicksTab';
+import RulesTab from './components/RulesTab';
 import { getPlayers } from './firebase';
 import { fetchMatches } from './api';
 
@@ -53,7 +54,10 @@ export default function App() {
   return (
     <div className="app">
       <header className="app-header">
+        <div className="header-crest-placeholder">DZ</div>
         <h1>World Cup 2026 <span className="accent">Soubella</span></h1>
+        <p className="header-sub">Algeria · Chaouki · Oussama · Taleb</p>
+        <div className="header-divider" />
       </header>
       <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
       <main className="app-content">
@@ -71,6 +75,7 @@ export default function App() {
             matches={matches}
           />
         )}
+        {activeTab === 'rules' && <RulesTab />}
       </main>
     </div>
   );
