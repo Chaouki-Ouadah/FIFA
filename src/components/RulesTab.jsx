@@ -22,7 +22,7 @@ const HOW_TO_AR = [
   {
     num: '٣',
     title: 'لا تتأخر',
-    desc: 'تُغلق التنبؤات قبل ساعة من انطلاق المباراة. بعد الإغلاق لا يمكنك تغيير توقعك.',
+    desc: 'تُغلق التنبؤات قبل 10 دقائق من انطلاق المباراة. بعد الإغلاق لا يمكنك تغيير توقعك.',
   },
   {
     num: '٤',
@@ -55,7 +55,7 @@ const HOW_TO = [
   {
     num: '03',
     title: 'Beat the deadline',
-    desc: 'Picks lock 1 hour before kickoff. After that you cannot change your prediction for that match.',
+    desc: 'Picks lock 10 minutes before kickoff. After that you cannot change your prediction for that match.',
   },
   {
     num: '04',
@@ -153,7 +153,7 @@ export default function RulesTab() {
         <div className="card">
           {[
             { label: 'Competition start (leaderboard cutoff)', value: 'June 14, 2026' },
-            { label: 'Pick lock per match', value: '1 hour before kickoff' },
+            { label: 'Pick lock per match', value: '10 minutes before kickoff' },
             { label: 'WC winner prediction deadline', value: 'June 24, 2026' },
             { label: 'Tournament end', value: 'July 19, 2026' },
           ].map(d => (

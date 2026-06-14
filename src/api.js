@@ -21,7 +21,7 @@ export async function fetchMatches() {
 }
 
 export function isPickLocked(matchUtcDate) {
-  return Date.now() >= new Date(matchUtcDate).getTime() - 60 * 60 * 1000;
+  return Date.now() >= new Date(matchUtcDate).getTime() - 10 * 60 * 1000;
 }
 
 export function isWcWinnerLocked() {
