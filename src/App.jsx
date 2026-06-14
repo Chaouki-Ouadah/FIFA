@@ -64,7 +64,7 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <button className="lang-toggle" onClick={toggleLang} title="Toggle language">
-          {lang === 'en' ? 'ع' : 'EN'}
+          {lang === 'en' ? 'العربية' : 'EN'}
         </button>
         <div className="header-crest-placeholder">DZ</div>
         <h1>World Cup 2026 <span className="accent">Soubella</span></h1>
