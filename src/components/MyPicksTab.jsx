@@ -1,4 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
+import {
+  getPlayerPicks,
+  savePick,
+  saveWcWinner,
+  getWcWinners,
+  addPlayer,
+  removePlayer,
+  getPlayers,
+} from '../firebase';
+import { isPickLocked, isWcWinnerLocked, matchStatusLabel } from '../api';
+import { t } from '../i18n';
 
 const WC2026_TEAMS = [
   'Albania','Algeria','Argentina','Australia','Austria',
@@ -23,16 +34,6 @@ const WC2026_TEAMS = [
   'Venezuela',
   'Wales',
 ];
-import {
-  getPlayerPicks,
-  savePick,
-  saveWcWinner,
-  getWcWinners,
-  addPlayer,
-  removePlayer,
-  getPlayers,
-} from '../firebase';
-import { isPickLocked, isWcWinnerLocked, matchStatusLabel } from '../api';
 
 export default function MyPicksTab({
   players,
@@ -40,6 +41,7 @@ export default function MyPicksTab({
   onPlayerChange,
   onPlayersChange,
   matches,
+  lang,
 }) {
   const [savedPicks, setSavedPicks] = useState({});
   const [localPicks, setLocalPicks] = useState({});
@@ -138,7 +140,7 @@ export default function MyPicksTab({
           value={activePlayer}
           onChange={e => onPlayerChange(e.target.value)}
         >
-          <option value="">Select player...</option>
+          <option value="">{t('select_player', lang)}</option>
           {players.map(p => (
             <option key={p.id} value={p.name}>{p.name}</option>
           ))}
@@ -147,35 +149,35 @@ export default function MyPicksTab({
 
       {/* Add new player — always visible */}
       <div className="add-player-section">
-        <div className="add-player-label">Add New Player</div>
+        <div className="add-player-label">{t('add_new_player', lang)}</div>
         <div className="admin-row">
           <input
             className="admin-input"
-            placeholder="Enter name..."
+            placeholder={t('enter_name', lang)}
             value={adminInput}
             onChange={e => setAdminInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleAddPlayer()}
           />
           <button className="admin-btn add" onClick={handleAddPlayer}>
-            Add
+            {t('add', lang)}
           </button>
         </div>
       </div>
 
       {!activePlayer && (
-        <div className="empty-state" style={{ paddingTop: 8 }}>Select your name above to start making picks.</div>
+        <div className="empty-state" style={{ paddingTop: 8 }}>{t('select_hint', lang)}</div>
       )}
 
       {activePlayer && (
         <>
           {/* WC Winner */}
           <div className="wc-winner-section">
-            <h2>World Cup Winner Prediction</h2>
-            <p className="wc-winner-ar">بطل العالم المتوقع</p>
+            <h2>{t('wc_title', lang)}</h2>
+            <p className="wc-winner-ar">{t('wc_ar', lang)}</p>
             {!wcLocked ? (
               <>
                 <p className="match-time" style={{ marginBottom: 8 }}>
-                  Deadline: 24 Jun 2026
+                  {t('deadline', lang)}
                 </p>
                 <select
                   className="wc-input"
@@ -183,9 +185,9 @@ export default function MyPicksTab({
                   onChange={e => setLocalWcWinner(e.target.value)}
                   disabled={wcSaving}
                 >
-                  <option value="">Select a country...</option>
-                  {WC2026_TEAMS.map(t => (
-                    <option key={t} value={t}>{t}</option>
+                  <option value="">{t('select_country', lang)}</option>
+                  {WC2026_TEAMS.map(team => (
+                    <option key={team} value={team}>{team}</option>
                   ))}
                 </select>
                 <button
@@ -194,26 +196,26 @@ export default function MyPicksTab({
                   onClick={handleSaveWcWinner}
                   disabled={wcSaving || !localWcWinner.trim()}
                 >
-                  {wcSaving ? 'Saving...' : 'Save Prediction'}
+                  {wcSaving ? t('saving', lang) : t('save_prediction', lang)}
                 </button>
                 {wcWinnerData && (
-                  <div className="wc-saved">Saved: {wcWinnerData.team}</div>
+                  <div className="wc-saved">{t('saved', lang)} {wcWinnerData.team}</div>
                 )}
               </>
             ) : (
               <div style={{ fontSize: '0.85rem' }}>
                 {wcWinnerData
-                  ? <><span style={{ color: 'var(--text-muted)' }}>Locked — </span>{wcWinnerData.team}</>
-                  : <span style={{ color: 'var(--text-muted)' }}>Deadline passed — no prediction saved.</span>
+                  ? <><span style={{ color: 'var(--text-muted)' }}>{t('locked_dash', lang)}</span>{wcWinnerData.team}</>
+                  : <span style={{ color: 'var(--text-muted)' }}>{t('deadline_passed', lang)}</span>
                 }
               </div>
             )}
           </div>
 
           {/* Match picks */}
-          <div className="section-title">Match Predictions</div>
+          <div className="section-title">{t('match_predictions', lang)}</div>
           {sortedMatches.length === 0 && (
-            <div className="empty-state">Loading matches...</div>
+            <div className="empty-state">{t('loading_matches', lang)}</div>
           )}
           {sortedMatches.map(match => (
             <PickCard
@@ -223,6 +225,7 @@ export default function MyPicksTab({
               onPickField={(f, v) => setPickField(match.id, f, v)}
               onSave={() => handleSavePick(match.id)}
               saving={!!saving[match.id]}
+              lang={lang}
             />
           ))}
         </>
@@ -231,7 +234,7 @@ export default function MyPicksTab({
       {/* Player list with remove (Chaouki only) */}
       {isAdmin && (
         <div className="admin-section">
-          <h2>Manage Players</h2>
+          <h2>{t('manage_players', lang)}</h2>
           <div className="players-list">
             {players.map(p => (
               <span key={p.id} className="player-tag">
@@ -251,7 +254,7 @@ export default function MyPicksTab({
   );
 }
 
-function PickCard({ match, pick, onPickField, onSave, saving }) {
+function PickCard({ match, pick, onPickField, onSave, saving, lang }) {
   const locked = isPickLocked(match.utcDate);
   const isLive = match.status === 'IN_PLAY' || match.status === 'PAUSED';
   const isFinished = match.status === 'FINISHED';
@@ -261,7 +264,7 @@ function PickCard({ match, pick, onPickField, onSave, saving }) {
   const pickLabel = !pick?.winner ? null
     : pick.winner === 'home' ? home
     : pick.winner === 'away' ? away
-    : 'Draw';
+    : t('draw', lang);
 
   return (
     <div className="pick-card">
@@ -275,14 +278,14 @@ function PickCard({ match, pick, onPickField, onSave, saving }) {
 
       {locked ? (
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-          <span className="locked-badge">Locked</span>
+          <span className="locked-badge">{t('locked', lang)}</span>
           {pickLabel ? (
             <span style={{ fontSize: '0.82rem' }}>
               {pickLabel}
               {pick.homeGoals !== undefined && ` (${pick.homeGoals}–${pick.awayGoals})`}
             </span>
           ) : (
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>No pick</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('no_pick', lang)}</span>
           )}
         </div>
       ) : (
@@ -294,7 +297,7 @@ function PickCard({ match, pick, onPickField, onSave, saving }) {
                 className={`pick-btn${pick?.winner === w ? ' selected' : ''}`}
                 onClick={() => onPickField('winner', w)}
               >
-                {w === 'home' ? home : w === 'away' ? away : 'Draw'}
+                {w === 'home' ? home : w === 'away' ? away : t('draw', lang)}
               </button>
             ))}
           </div>
@@ -323,7 +326,7 @@ function PickCard({ match, pick, onPickField, onSave, saving }) {
               onClick={onSave}
               disabled={saving || !pick?.winner}
             >
-              {saving ? '...' : 'Save'}
+              {saving ? '...' : t('save', lang)}
             </button>
           </div>
         </>

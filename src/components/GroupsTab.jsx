@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { matchStatusLabel } from '../api';
+import { t } from '../i18n';
 
 function formatTime(utcDate) {
   return new Date(utcDate).toLocaleString(undefined, {
@@ -19,16 +20,7 @@ const STAGE_ORDER = [
   'FINAL',
 ];
 
-const STAGE_LABELS = {
-  GROUP_STAGE: null,
-  ROUND_OF_16: 'Round of 16',
-  QUARTER_FINALS: 'Quarter-Finals',
-  SEMI_FINALS: 'Semi-Finals',
-  THIRD_PLACE: 'Third Place',
-  FINAL: 'Final',
-};
-
-export default function GroupsTab({ matches }) {
+export default function GroupsTab({ matches, lang }) {
   const sections = useMemo(() => {
     const byGroup = {};
     const byStage = {};
@@ -49,22 +41,22 @@ export default function GroupsTab({ matches }) {
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([key, ms]) => ({
         key,
-        label: key.replace('GROUP_', 'Group '),
+        label: key.replace('GROUP_', t('group', lang) + ' '),
         matches: ms.sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate)),
       }));
 
     const knockouts = STAGE_ORDER.filter(s => s !== 'GROUP_STAGE' && byStage[s])
       .map(s => ({
         key: s,
-        label: STAGE_LABELS[s] ?? s,
+        label: t(`stage_${s}`, lang),
         matches: byStage[s].sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate)),
       }));
 
     return { groups, knockouts };
-  }, [matches]);
+  }, [matches, lang]);
 
   if (matches.length === 0) {
-    return <div className="empty-state">Loading fixtures...</div>;
+    return <div className="empty-state">{t('loading_fixtures', lang)}</div>;
   }
 
   return (

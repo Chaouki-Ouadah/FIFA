@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getAllPicksForMatches, getWcWinners } from '../firebase';
 import { computeScores, scoreMatch } from '../scoring';
+import { t } from '../i18n';
 
 const CUTOFF_TS = new Date('2026-06-14T00:00:00Z').getTime();
 
-export default function LeaderboardTab({ players, matches }) {
+export default function LeaderboardTab({ players, matches, lang }) {
   const [allPicks, setAllPicks] = useState({});
   const [wcWinners, setWcWinners] = useState({});
   const [loading, setLoading] = useState(true);
@@ -47,13 +48,13 @@ export default function LeaderboardTab({ players, matches }) {
     [matches]
   );
 
-  if (loading) return <div className="empty-state">Calculating scores...</div>;
-  if (players.length === 0) return <div className="empty-state">No players yet.</div>;
+  if (loading) return <div className="empty-state">{t('calculating', lang)}</div>;
+  if (players.length === 0) return <div className="empty-state">{t('no_players', lang)}</div>;
 
   return (
     <div>
       {sorted.length >= 2 && <Podium players={sorted} scores={scores} />}
-      <div className="section-title">Rankings</div>
+      <div className="section-title">{t('rankings', lang)}</div>
       <div className="rank-list">
         {sorted.map((p, i) => (
           <div key={p.id} style={{ marginBottom: 6 }}>
@@ -74,21 +75,22 @@ export default function LeaderboardTab({ players, matches }) {
                 matches={finishedMatches}
                 allPicks={allPicks}
                 wcWinners={wcWinners}
+                lang={lang}
               />
             )}
           </div>
         ))}
       </div>
-      <ScoringGuide />
+      <ScoringGuide lang={lang} />
     </div>
   );
 }
 
-function PlayerBreakdown({ player, matches, allPicks, wcWinners }) {
+function PlayerBreakdown({ player, matches, allPicks, wcWinners, lang }) {
   if (matches.length === 0) {
     return (
       <div className="breakdown-panel">
-        <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>No finished matches yet.</span>
+        <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{t('no_finished', lang)}</span>
       </div>
     );
   }
@@ -98,10 +100,10 @@ function PlayerBreakdown({ player, matches, allPicks, wcWinners }) {
       <table className="breakdown-table">
         <thead>
           <tr>
-            <th>Match</th>
-            <th>Predicted</th>
-            <th>Actual</th>
-            <th>Pts</th>
+            <th>{t('breakdown_match', lang)}</th>
+            <th>{t('breakdown_predicted', lang)}</th>
+            <th>{t('breakdown_actual', lang)}</th>
+            <th>{t('breakdown_pts', lang)}</th>
           </tr>
         </thead>
         <tbody>
@@ -114,7 +116,7 @@ function PlayerBreakdown({ player, matches, allPicks, wcWinners }) {
             const aa = m.score?.fullTime?.away;
 
             const predictedLabel = pick
-              ? `${pick.homeGoals ?? '?'} – ${pick.awayGoals ?? '?'} (${pick.winner === 'home' ? home : pick.winner === 'away' ? away : 'Draw'})`
+              ? `${pick.homeGoals ?? '?'} – ${pick.awayGoals ?? '?'} (${pick.winner === 'home' ? home : pick.winner === 'away' ? away : t('draw', lang)})`
               : '—';
 
             return (
@@ -134,11 +136,11 @@ function PlayerBreakdown({ player, matches, allPicks, wcWinners }) {
           {wcWinners[player.id] && (
             <tr className="breakdown-wc-row">
               <td colSpan={2} style={{ color: 'var(--accent-gold)', fontFamily: 'var(--font-heading)', fontSize: '0.78rem', paddingTop: 8 }}>
-                WC Winner: {wcWinners[player.id].team}
+                {t('wc_winner_label', lang)} {wcWinners[player.id].team}
               </td>
               <td />
               <td className="breakdown-pts">
-                <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>TBD</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>{t('tbd', lang)}</span>
               </td>
             </tr>
           )}
@@ -180,20 +182,22 @@ function Podium({ players, scores }) {
   );
 }
 
-function ScoringGuide() {
+function ScoringGuide({ lang }) {
+  const rows = [
+    [t('rule_correct_winner', lang), '+3'],
+    [t('rule_winner_diff', lang), '+5 total'],
+    [t('rule_exact', lang), '+10 total'],
+    [t('rule_draw', lang), '+3'],
+    [t('rule_exact_draw', lang), '+8 total'],
+    [t('rule_wc', lang), '+10'],
+  ];
+
   return (
     <div className="card" style={{ marginTop: 24 }}>
-      <div className="card-title">Scoring Rules</div>
+      <div className="card-title">{t('scoring_rules', lang)}</div>
       <table style={{ width: '100%', fontSize: '0.8rem', borderCollapse: 'collapse' }}>
         <tbody>
-          {[
-            ['Correct winner', '+3'],
-            ['Correct winner + goal diff', '+5 total'],
-            ['Exact score', '+10 total'],
-            ['Correct draw', '+3'],
-            ['Exact draw score', '+8 total'],
-            ['WC winner (one-time)', '+10'],
-          ].map(([rule, pts]) => (
+          {rows.map(([rule, pts]) => (
             <tr key={rule} style={{ borderBottom: '1px solid var(--border)' }}>
               <td style={{ padding: '7px 0', color: 'var(--text-muted)' }}>{rule}</td>
               <td style={{ padding: '7px 0', textAlign: 'right', color: 'var(--accent)', fontWeight: 700 }}>{pts}</td>

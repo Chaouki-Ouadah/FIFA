@@ -64,6 +64,26 @@ body::before {
   overflow: hidden;
 }
 
+.lang-toggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-muted);
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  z-index: 10;
+}
+
+.lang-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
 .app-header::before {
   content: '';
   position: absolute;

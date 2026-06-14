@@ -15,6 +15,9 @@ export default function App() {
   );
   const [matches, setMatches] = useState([]);
   const [matchError, setMatchError] = useState(null);
+  const [lang, setLang] = useState(
+    () => localStorage.getItem('wc_lang') || 'en'
+  );
 
   useEffect(() => {
     getPlayers().then(setPlayers).catch(console.error);
@@ -51,20 +54,29 @@ export default function App() {
     localStorage.setItem('wc_activePlayer', name);
   }
 
+  function toggleLang() {
+    const next = lang === 'en' ? 'ar' : 'en';
+    setLang(next);
+    localStorage.setItem('wc_lang', next);
+  }
+
   return (
     <div className="app">
       <header className="app-header">
+        <button className="lang-toggle" onClick={toggleLang} title="Toggle language">
+          {lang === 'en' ? 'ع' : 'EN'}
+        </button>
         <div className="header-crest-placeholder">DZ</div>
         <h1>World Cup 2026 <span className="accent">Soubella</span></h1>
         <p className="header-sub">Algeria · World Cup 2026</p>
         <div className="header-divider" />
       </header>
-      <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
+      <TabNav activeTab={activeTab} onTabChange={setActiveTab} lang={lang} />
       <main className="app-content">
         {matchError && <div className="error-banner">{matchError}</div>}
-        {activeTab === 'groups' && <GroupsTab matches={matches} />}
+        {activeTab === 'groups' && <GroupsTab matches={matches} lang={lang} />}
         {activeTab === 'leaderboard' && (
-          <LeaderboardTab players={players} matches={matches} />
+          <LeaderboardTab players={players} matches={matches} lang={lang} />
         )}
         {activeTab === 'picks' && (
           <MyPicksTab
@@ -73,9 +85,10 @@ export default function App() {
             onPlayerChange={handlePlayerChange}
             onPlayersChange={setPlayers}
             matches={matches}
+            lang={lang}
           />
         )}
-        {activeTab === 'rules' && <RulesTab />}
+        {activeTab === 'rules' && <RulesTab lang={lang} />}
       </main>
     </div>
   );
