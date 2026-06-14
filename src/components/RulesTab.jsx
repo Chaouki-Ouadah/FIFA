@@ -117,6 +117,28 @@ export default function RulesTab({ lang }) {
           ))}
         </div>
       </div>
+
+      {/* Late joiner notice */}
+      <div className="late-joiner-banner">
+        <div className="late-joiner-icon">🎲</div>
+        <div>
+          {isAr ? (
+            <>
+              <strong style={{ display: 'block', marginBottom: 4, direction: 'rtl' }}>انضممت متأخراً؟ لا مشكلة!</strong>
+              <span style={{ direction: 'rtl', display: 'block' }}>
+                ستُسند إليك تلقائياً توقعات أحد المشاركين بشكل عشوائي عن المباريات التي فاتتك، حتى لا تبدأ من الصفر.
+              </span>
+            </>
+          ) : (
+            <>
+              <strong style={{ display: 'block', marginBottom: 4 }}>Joined late? No worries!</strong>
+              <span>
+                Any matches you missed will be automatically filled with a random participant's predictions — so you don't start from zero.
+              </span>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
