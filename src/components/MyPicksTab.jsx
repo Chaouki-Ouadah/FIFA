@@ -111,7 +111,30 @@ export default function MyPicksTab({
   async function handleAddPlayer() {
     const name = adminInput.trim();
     if (!name) return;
-    await addPlayer(name);
+
+    const newPlayer = await addPlayer(name);
+
+    // Copy Chaouki's picks for all locked matches to the new player
+    const chaouki = players.find(p => p.name === 'Chaouki');
+    if (chaouki) {
+      const lockedMatches = matches.filter(m => isPickLocked(m.utcDate));
+      if (lockedMatches.length > 0) {
+        const chaoukiPicks = await getPlayerPicks(
+          chaouki.id,
+          lockedMatches.map(m => m.id)
+        );
+        await Promise.all(
+          Object.entries(chaoukiPicks).map(([matchId, pick]) =>
+            savePick(matchId, newPlayer.id, {
+              winner: pick.winner,
+              homeGoals: pick.homeGoals ?? 0,
+              awayGoals: pick.awayGoals ?? 0,
+            })
+          )
+        );
+      }
+    }
+
     const updated = await getPlayers();
     onPlayersChange(updated);
     setAdminInput('');
