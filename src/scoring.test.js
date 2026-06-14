@@ -52,6 +52,32 @@ describe('scoreMatch', () => {
   it('returns 0 for 0-0 draw picked on non-draw match', () => {
     expect(scoreMatch({ winner: 'home', homeGoals: 0, awayGoals: 0 }, match(1, 1))).toBe(0);
   });
+
+  it('returns 10 for correct winner via penalties + exact fullTime score', () => {
+    // Match ended 1-1, home won on pens. Picking home + 1-1 = correct winner + exact score = 10
+    const penMatch = {
+      ...match(1, 1),
+      score: { fullTime: { home: 1, away: 1 }, winner: 'HOME_TEAM' },
+    };
+    expect(scoreMatch({ winner: 'home', homeGoals: 1, awayGoals: 1 }, penMatch)).toBe(10);
+  });
+
+  it('returns 3 for correct winner via penalties, wrong fullTime score', () => {
+    // Match ended 1-1, home won on pens. Picking home + 2-1 = correct winner only = 3
+    const penMatch = {
+      ...match(1, 1),
+      score: { fullTime: { home: 1, away: 1 }, winner: 'HOME_TEAM' },
+    };
+    expect(scoreMatch({ winner: 'home', homeGoals: 2, awayGoals: 1 }, penMatch)).toBe(3);
+  });
+
+  it('returns 0 for predicting draw when home won on penalties', () => {
+    const penMatch = {
+      ...match(1, 1),
+      score: { fullTime: { home: 1, away: 1 }, winner: 'HOME_TEAM' },
+    };
+    expect(scoreMatch({ winner: 'draw', homeGoals: 1, awayGoals: 1 }, penMatch)).toBe(0);
+  });
 });
 
 describe('computeScores', () => {
