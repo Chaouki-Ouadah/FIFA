@@ -1,11 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { getAllPicksForMatches, getWcWinners } from '../firebase';
-import { computeScores } from '../scoring';
+import { computeScores, scoreMatch } from '../scoring';
+
+const CUTOFF_TS = new Date('2026-06-14T00:00:00Z').getTime();
 
 export default function LeaderboardTab({ players, matches }) {
   const [allPicks, setAllPicks] = useState({});
   const [wcWinners, setWcWinners] = useState({});
   const [loading, setLoading] = useState(true);
+  const [expandedId, setExpandedId] = useState(null);
 
   useEffect(() => {
     if (players.length === 0) { setLoading(false); return; }
@@ -37,6 +40,13 @@ export default function LeaderboardTab({ players, matches }) {
     [players, scores]
   );
 
+  const finishedMatches = useMemo(
+    () => matches
+      .filter(m => m.status === 'FINISHED' && new Date(m.utcDate).getTime() >= CUTOFF_TS)
+      .sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate)),
+    [matches]
+  );
+
   if (loading) return <div className="empty-state">Calculating scores...</div>;
   if (players.length === 0) return <div className="empty-state">No players yet.</div>;
 
@@ -46,14 +56,94 @@ export default function LeaderboardTab({ players, matches }) {
       <div className="section-title">Rankings</div>
       <div className="rank-list">
         {sorted.map((p, i) => (
-          <div key={p.id} className="rank-row">
-            <span className="rank-num">#{i + 1}</span>
-            <span className="rank-name">{p.name}</span>
-            <span className="rank-pts">{scores[p.id] ?? 0} pts</span>
+          <div key={p.id} style={{ marginBottom: 6 }}>
+            <div
+              className={`rank-row rank-${i + 1}${expandedId === p.id ? ' expanded' : ''}`}
+              onClick={() => setExpandedId(expandedId === p.id ? null : p.id)}
+            >
+              <span className="rank-num">#{i + 1}</span>
+              <span className="rank-name">{p.name}</span>
+              <span style={{ flex: 1 }} />
+              <span className="rank-pts">{scores[p.id] ?? 0} pts</span>
+              <span className="rank-chevron">{expandedId === p.id ? '▲' : '▼'}</span>
+            </div>
+
+            {expandedId === p.id && (
+              <PlayerBreakdown
+                player={p}
+                matches={finishedMatches}
+                allPicks={allPicks}
+                wcWinners={wcWinners}
+              />
+            )}
           </div>
         ))}
       </div>
       <ScoringGuide />
+    </div>
+  );
+}
+
+function PlayerBreakdown({ player, matches, allPicks, wcWinners }) {
+  if (matches.length === 0) {
+    return (
+      <div className="breakdown-panel">
+        <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>No finished matches yet.</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="breakdown-panel">
+      <table className="breakdown-table">
+        <thead>
+          <tr>
+            <th>Match</th>
+            <th>Predicted</th>
+            <th>Actual</th>
+            <th>Pts</th>
+          </tr>
+        </thead>
+        <tbody>
+          {matches.map(m => {
+            const pick = allPicks[m.id]?.[player.id];
+            const pts = scoreMatch(pick, m);
+            const home = m.homeTeam?.shortName ?? m.homeTeam?.name ?? '?';
+            const away = m.awayTeam?.shortName ?? m.awayTeam?.name ?? '?';
+            const ah = m.score?.fullTime?.home;
+            const aa = m.score?.fullTime?.away;
+
+            const predictedLabel = pick
+              ? `${pick.homeGoals ?? '?'} – ${pick.awayGoals ?? '?'} (${pick.winner === 'home' ? home : pick.winner === 'away' ? away : 'Draw'})`
+              : '—';
+
+            return (
+              <tr key={m.id} className={pts > 0 ? 'breakdown-scored' : ''}>
+                <td className="breakdown-match">{home} vs {away}</td>
+                <td className="breakdown-pred">{predictedLabel}</td>
+                <td className="breakdown-actual">{ah} – {aa}</td>
+                <td className="breakdown-pts">
+                  {pts > 0
+                    ? <span className="pts-badge">{`+${pts}`}</span>
+                    : <span style={{ color: 'var(--text-muted)' }}>{pick ? '0' : '—'}</span>
+                  }
+                </td>
+              </tr>
+            );
+          })}
+          {wcWinners[player.id] && (
+            <tr className="breakdown-wc-row">
+              <td colSpan={2} style={{ color: 'var(--accent-gold)', fontFamily: 'var(--font-heading)', fontSize: '0.78rem', paddingTop: 8 }}>
+                WC Winner: {wcWinners[player.id].team}
+              </td>
+              <td />
+              <td className="breakdown-pts">
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>TBD</span>
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -68,7 +158,7 @@ function Podium({ players, scores }) {
 
   const META = [
     { label: '2', height: '72px', bg: '#94a3b8' },
-    { label: '1', height: '100px', bg: '#f59e0b' },
+    { label: '1', height: '100px', bg: 'var(--accent-gold)' },
     { label: '3', height: '52px', bg: '#b45309' },
   ];
 
