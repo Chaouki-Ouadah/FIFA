@@ -408,8 +408,16 @@ body::before {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: 2px;
   color: var(--accent);
+}
+
+.wc-winner-ar {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  direction: rtl;
+  margin-bottom: 10px;
+  font-family: var(--font-body);
 }
 
 .wc-input {
@@ -425,6 +433,8 @@ body::before {
 }
 
 .wc-input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+select.wc-input { cursor: pointer; }
+select.wc-input option { background: var(--surface-2); color: var(--text); }
 .wc-saved { font-size: 0.8rem; color: var(--accent); margin-top: 6px; font-weight: 600; }
 
 .pick-card {

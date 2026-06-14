@@ -1,4 +1,28 @@
 import { useState, useEffect, useMemo } from 'react';
+
+const WC2026_TEAMS = [
+  'Albania','Algeria','Argentina','Australia','Austria',
+  'Belgium','Bolivia','Brazil',
+  'Cameroon','Canada','Chile','Colombia','Costa Rica','Croatia','Czech Republic',
+  'Denmark','DR Congo',
+  'Ecuador','Egypt','England',
+  'France',
+  'Germany','Ghana',
+  'Honduras','Hungary',
+  'Indonesia','Iran','Iraq','Israel','Italy','Ivory Coast',
+  'Jamaica','Japan','Jordan',
+  'Mexico','Morocco',
+  'Netherlands','New Zealand','Nigeria','Norway',
+  'Oman',
+  'Panama','Paraguay','Peru','Poland','Portugal',
+  'Qatar',
+  'Romania',
+  'Saudi Arabia','Scotland','Senegal','Serbia','Slovakia','Slovenia','South Africa','South Korea','Spain','Sweden','Switzerland',
+  'Tunisia','Turkey',
+  'Ukraine','United States','Uruguay','Uzbekistan',
+  'Venezuela',
+  'Wales',
+];
 import {
   getPlayerPicks,
   savePick,
@@ -146,23 +170,27 @@ export default function MyPicksTab({
         <>
           {/* WC Winner */}
           <div className="wc-winner-section">
-            <h2>WC Winner Prediction</h2>
+            <h2>World Cup Winner Prediction</h2>
+            <p className="wc-winner-ar">بطل العالم المتوقع</p>
             {!wcLocked ? (
               <>
                 <p className="match-time" style={{ marginBottom: 8 }}>
                   Deadline: 24 Jun 2026
                 </p>
-                <input
+                <select
                   className="wc-input"
-                  type="text"
-                  placeholder="Country name..."
                   value={localWcWinner}
                   onChange={e => setLocalWcWinner(e.target.value)}
                   disabled={wcSaving}
-                />
+                >
+                  <option value="">Select a country...</option>
+                  {WC2026_TEAMS.map(t => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
                 <button
                   className="save-btn"
-                  style={{ display: 'block', marginLeft: 0 }}
+                  style={{ display: 'block', marginLeft: 0, marginTop: 10 }}
                   onClick={handleSaveWcWinner}
                   disabled={wcSaving || !localWcWinner.trim()}
                 >
