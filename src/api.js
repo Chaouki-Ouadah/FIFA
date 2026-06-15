@@ -8,7 +8,7 @@ export async function fetchMatches() {
 
   if (_cache && now - _cacheTs < ttl) return _cache;
 
-  const res = await fetch('/.netlify/functions/matches');
+  const res = await fetch('/api/matches');
 
   if (!res.ok) throw new Error(`API error ${res.status}`);
 
