@@ -162,8 +162,8 @@ export default function MyPicksTab({
     () => matches
       .filter(m => {
         if (new Date(m.utcDate).getTime() < CUTOFF_TS) return false;
-        // Hide locked matches where the player has no pick — nothing to show or do
-        if (isPickLocked(m.utcDate) && !savedPicks[m.id]?.winner) return false;
+        // Hide only finished matches where player made no pick
+        if (m.status === 'FINISHED' && !savedPicks[m.id]?.winner) return false;
         return true;
       })
       .sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate)),
