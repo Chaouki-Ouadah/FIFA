@@ -346,7 +346,12 @@ function PickCard({ match, pick, onPickField, onSave, saving, lang }) {
               max="20"
               value={pick?.homeGoals ?? ''}
               placeholder="0"
-              onChange={e => onPickField('homeGoals', e.target.value)}
+              onChange={e => {
+                const h = e.target.value;
+                onPickField('homeGoals', h);
+                const away_ = pick?.awayGoals ?? '';
+                if (h !== '' && away_ !== '' && Number(h) === Number(away_)) onPickField('winner', 'draw');
+              }}
             />
             <span style={{ color: 'var(--text-muted)' }}>–</span>
             <input
@@ -356,7 +361,12 @@ function PickCard({ match, pick, onPickField, onSave, saving, lang }) {
               max="20"
               value={pick?.awayGoals ?? ''}
               placeholder="0"
-              onChange={e => onPickField('awayGoals', e.target.value)}
+              onChange={e => {
+                const a = e.target.value;
+                onPickField('awayGoals', a);
+                const home_ = pick?.homeGoals ?? '';
+                if (a !== '' && home_ !== '' && Number(a) === Number(home_)) onPickField('winner', 'draw');
+              }}
             />
             <button
               className="save-btn"
